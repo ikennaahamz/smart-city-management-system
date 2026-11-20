@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart City Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+
+  <!-- Screen 1: Sign In & Citizen Registration -->
+  <main id="auth-screen" class="auth-shell">
+    <section class="auth-grid">
+      <aside class="auth-brief">
+        <div class="brand-lockup">
+          <span class="brand-mark" aria-hidden="true">SC</span>
+          <div>
+            <p class="brand-name">Smart City Operations</p>
+            <p class="brand-sub">Municipal Infrastructure &amp; Citizen Desk</p>
+          </div>
+        </div>
+        <h1>Unified urban operations on one PostgreSQL core.</h1>
+        <p class="auth-lead">
+          Manage citizen service requests, dispatch field technicians, inspect urban IoT telemetry,
+          collect utility payments, and run live analytical SQL across nine normalized tables.
+        </p>
+
+        <div class="demo-panel">
+          <p class="demo-title">One-click demo credentials (password: <code>Passw0rd!</code>)</p>
+          <div class="demo-buttons">
+            <button type="button" class="demo-chip" data-demo-user="admin">
+              <strong>admin</strong>
+              <span>System Administrator</span>
+            </button>
+            <button type="button" class="demo-chip" data-demo-user="staff.elena">
+              <strong>staff.elena</strong>
+              <span>Municipal Employee</span>
+            </button>
+            <button type="button" class="demo-chip" data-demo-user="tech.kemal">
+              <strong>tech.kemal</strong>
+              <span>Technical Staff</span>
+            </button>
+            <button type="button" class="demo-chip" data-demo-user="citizen.ali">
+              <strong>citizen.ali</strong>
+              <span>Citizen Portal</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <section class="auth-card">
+        <div class="tab-bar" role="tablist">
+          <button type="button" class="tab-btn active" data-auth-tab="login">Sign in</button>
+          <button type="button" class="tab-btn" data-auth-tab="register">Register citizen</button>
+        </div>
+
+        <form id="login-form" class="stack-form">
+          <div class="field">
+            <label for="login-username">Username</label>
+            <input id="login-username" name="username" type="text" autocomplete="username" required placeholder="e.g. admin" />
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="Enter password" />
+          </div>
+          <p id="login-error" class="form-error" hidden></p>
+          <button type="submit" class="btn btn-primary btn-block">Sign in to desk</button>
+        </form>
+
+        <form id="register-form" class="stack-form" hidden>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="reg-username">Username</label>
+              <input id="reg-username" name="username" type="text" required minlength="3" placeholder="citizen.new" />
+            </div>
+            <div class="field">
+              <label for="reg-fullname">Full name</label>
+              <input id="reg-fullname" name="full_name" type="text" required placeholder="Nadia Yilmaz" />
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="reg-email">Email address</label>
+              <input id="reg-email" name="email" type="email" required placeholder="nadia@example.org" />
+            </div>
+            <div class="field">
+              <label for="reg-national-id">National ID</label>
+              <input id="reg-national-id" name="national_id" type="text" required placeholder="CIT-1099" />
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="reg-district">District</label>
+              <input id="reg-district" name="district_name" type="text" required placeholder="Central District" />
+            </div>
+            <div class="field">
+              <label for="reg-phone">Phone number</label>
+              <input id="reg-phone" name="phone" type="text" required placeholder="+90 533 555 0144" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="reg-address">Residential address</label>
+            <input id="reg-address" name="address" type="text" required placeholder="18 Municipal Ave, Apt 4" />
+          </div>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="reg-password">Password (8+ chars, letter &amp; digit)</label>
+              <input id="reg-password" name="password" type="password" required minlength="8" />
+            </div>
+            <div class="field">
+              <label for="reg-confirm">Confirm password</label>
+              <input id="reg-confirm" name="confirmation" type="password" required minlength="8" />
+            </div>
+          </div>
+          <p id="register-error" class="form-error" hidden></p>
+          <button type="submit" class="btn btn-primary btn-block">Create citizen account</button>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <!-- Authenticated Application Workspace (Screens 2–8) -->
+  <div id="app-shell" class="app-shell" hidden>
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-top">
+        <div class="brand-lockup brand-lockup-dark">
+          <span class="brand-mark" aria-hidden="true">SC</span>
+          <div>
+            <p class="brand-name">Smart City</p>
+            <p class="brand-sub">Operations Desk</p>
+          </div>
+        </div>
+        <button id="close-nav-btn" type="button" class="icon-btn mobile-only" aria-label="Close navigation">&times;</button>
+      </div>
+
+      <nav id="sidebar-nav" class="sidebar-nav" aria-label="Primary"></nav>
+
+      <div class="sidebar-footer">
+        <div class="db-pill" id="db-status-pill">
+          <span class="status-dot"></span>
+          <span id="db-status-text">Checking PostgreSQL...</span>
+        </div>
+        <div class="user-card">
+          <p id="sidebar-user-name" class="user-name">-</p>
+          <p id="sidebar-user-role" class="user-role">-</p>
+        </div>
+        <button id="logout-btn" type="button" class="btn btn-ghost btn-block">Sign out</button>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="open-nav-btn" type="button" class="icon-btn mobile-only" aria-label="Open navigation">&#9776;</button>
+          <div>
+            <h1 id="page-title" class="page-title">Operations Overview</h1>
+            <p id="page-subtitle" class="page-subtitle">Live status across city services, sensors, and infrastructure.</p>
+          </div>
+        </div>
+        <div id="topbar-actions" class="topbar-actions"></div>
+      </header>
+
+      <div id="workspace-body" class="workspace-body"></div>
+    </div>
+  </div>
+
+  <!-- Slide-over Drawer for Create / Edit / Procedure Execution -->
+  <div id="drawer-backdrop" class="drawer-backdrop" hidden>
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+      <header class="drawer-header">
+        <div>
+          <h2 id="drawer-title">Action</h2>
+          <p id="drawer-subtitle" class="drawer-subtitle"></p>
+        </div>
+        <button id="drawer-close" type="button" class="icon-btn" aria-label="Close panel">&times;</button>
+      </header>
+      <div id="drawer-body" class="drawer-body"></div>
+    </aside>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
