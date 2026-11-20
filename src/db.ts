@@ -160,7 +160,10 @@ export function friendlyError(err: unknown): { message: string; sqlstate?: strin
   }
 }
 
-export function buildSslConfig(dsn: string): false | { rejectUnauthorized: boolean } {
+export function buildPgConnectionConfig(dsn: string): {
+  connectionString: string;
+  ssl: false | { rejectUnauthorized: boolean };
+} {
   try {
     const parsed = new URL(dsn);
     const sslMode = parsed.searchParams.get("sslmode")?.toLowerCase();
@@ -168,13 +171,25 @@ export function buildSslConfig(dsn: string): false | { rejectUnauthorized: boole
       parsed.hostname === "localhost" ||
       parsed.hostname === "127.0.0.1" ||
       parsed.hostname === "::1";
+
     if (sslMode === "disable" || (isLocal && !sslMode)) {
-      return false;
+      return { connectionString: dsn, ssl: false };
     }
-    return { rejectUnauthorized: false };
+    if (sslMode === "verify-full" || sslMode === "verify-ca") {
+      return { connectionString: dsn, ssl: { rejectUnauthorized: true } };
+    }
+
+    // Remove sslmode=require/prefer so pg-connection-string does not treat it as verify-full
+    // and override `ssl: { rejectUnauthorized: false }` on Supabase/cloud poolers.
+    parsed.searchParams.delete("sslmode");
+    return { connectionString: parsed.toString(), ssl: { rejectUnauthorized: false } };
   } catch {
-    return false;
+    return { connectionString: dsn, ssl: false };
   }
+}
+
+export function buildSslConfig(dsn: string): false | { rejectUnauthorized: boolean } {
+  return buildPgConnectionConfig(dsn).ssl;
 }
 
 const globalForDb = globalThis as unknown as { __scmsPool?: Pool };
@@ -183,11 +198,10 @@ function getPool(): Pool {
   if (!globalForDb.__scmsPool) {
     const dsn = resolveDsn();
     globalForDb.__scmsPool = new Pool({
-      connectionString: dsn,
+      ...buildPgConnectionConfig(dsn),
       max: Number(process.env.DB_POOL_MAX ?? 5),
       connectionTimeoutMillis: Number(process.env.DB_CONNECT_TIMEOUT_MS ?? 30_000),
       idleTimeoutMillis: 30_000,
-      ssl: buildSslConfig(dsn),
     });
 
     globalForDb.__scmsPool.on("error", (err) => {

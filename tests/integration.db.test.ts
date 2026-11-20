@@ -27,7 +27,7 @@ describe.skipIf(!RUN_DB)("PostgreSQL live integration tests", () => {
     if (tables.length < 9) {
       throw new Error("Run 'npm run db:apply' before running live DB integration tests.");
     }
-  });
+  }, 30_000);
 
   afterAll(async () => {
     for (const id of createdIds.readingIds) {
@@ -41,8 +41,14 @@ describe.skipIf(!RUN_DB)("PostgreSQL live integration tests", () => {
     for (const id of createdIds.requestIds) {
       await exec("DELETE FROM service_requests WHERE request_id = $1", [id]).catch(() => undefined);
     }
+    await exec("DELETE FROM service_requests WHERE title = 'Integration Test Pothole'").catch(
+      () => undefined,
+    );
+    await exec("DELETE FROM utility_accounts WHERE meter_number LIKE 'TEST-MTR-%'").catch(
+      () => undefined,
+    );
     await closePool();
-  });
+  }, 30_000);
 
   it("contains all 9 schema tables", async () => {
     const rows = await query<{ table_name: string }>(
@@ -63,7 +69,7 @@ describe.skipIf(!RUN_DB)("PostgreSQL live integration tests", () => {
     ]) {
       expect(names.has(expected)).toBe(true);
     }
-  });
+  }, 30_000);
 
   it("enforces UNIQUE, FK, and CHECK constraints with SQLSTATE codes", async () => {
     await expect(
@@ -81,7 +87,7 @@ describe.skipIf(!RUN_DB)("PostgreSQL live integration tests", () => {
         "INSERT INTO users (username, email, password_hash, full_name, role_id) VALUES ('badfk', 'badfk@test.org', 'hash', 'Bad FK', 999999)",
       ),
     ).rejects.toMatchObject({ sqlstate: "23503" });
-  });
+  }, 30_000);
 
   it("fires triggers for request resolution, sensor anomaly detection, and work order completion", async () => {
     const citizenId = await queryOne<number>("SELECT MIN(citizen_id) FROM citizens");
@@ -150,7 +156,7 @@ describe.skipIf(!RUN_DB)("PostgreSQL live integration tests", () => {
       );
       expect(flagged).toBe(true);
     }
-  });
+  }, 30_000);
 
   it("record_utility_payment updates balance, blocks overpayment, and clears Overdue at zero", async () => {
     const citizenId = await queryOne<number>("SELECT MIN(citizen_id) FROM citizens");
@@ -188,7 +194,7 @@ describe.skipIf(!RUN_DB)("PostgreSQL live integration tests", () => {
         () => undefined,
       );
     }
-  });
+  }, 30_000);
 
   it("executes PL/pgSQL functions and all 7 analytical queries cleanly", async () => {
     const avgHours = await runAvgResolutionHours();
@@ -208,7 +214,7 @@ describe.skipIf(!RUN_DB)("PostgreSQL live integration tests", () => {
     await withTransaction(async (client) => {
       await client.query(queriesSql);
     });
-  });
+  }, 30_000);
 
   it("authenticates all 4 demo roles via HTTP and enforces live DB routes and role gates", async () => {
     async function loginAs(username: string): Promise<string> {
@@ -266,5 +272,5 @@ describe.skipIf(!RUN_DB)("PostgreSQL live integration tests", () => {
     expect(
       (await request(app).get("/api/analytics").set("Cookie", citizenCookie)).status,
     ).toBe(403);
-  });
+  }, 45_000);
 });

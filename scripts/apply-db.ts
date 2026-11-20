@@ -9,7 +9,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { Client } from "pg";
-import { buildSslConfig, dbTarget, dsnFingerprint, normaliseDsn, redact } from "../src/db";
+import { buildPgConnectionConfig, dbTarget, dsnFingerprint, normaliseDsn, redact } from "../src/db";
 import { loadEnv } from "../src/env";
 
 loadEnv();
@@ -43,9 +43,8 @@ async function main(): Promise<number> {
   console.log(`Target (${source}): ${dsnFingerprint(dsn)}`);
 
   const client = new Client({
-    connectionString: dsn,
+    ...buildPgConnectionConfig(dsn),
     connectionTimeoutMillis: 30_000,
-    ssl: buildSslConfig(dsn),
   });
 
   await client.connect();

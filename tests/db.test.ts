@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  buildPgConnectionConfig,
   callProcedure,
   DatabaseError,
   dsnFingerprint,
@@ -73,5 +74,24 @@ describe("db helpers", () => {
     await expect(callProcedure("drop_everything", [])).rejects.toThrow(
       "Procedure 'drop_everything' is not on the allowlist.",
     );
+  });
+
+  it("buildPgConnectionConfig disables SSL for local hosts and handles sslmode safely for cloud hosts", () => {
+    expect(buildPgConnectionConfig("postgresql://postgres:pw@localhost:5432/scms")).toEqual({
+      connectionString: "postgresql://postgres:pw@localhost:5432/scms",
+      ssl: false,
+    });
+
+    const supabaseReq = buildPgConnectionConfig(
+      "postgresql://postgres.ref:pw@aws-0-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require",
+    );
+    expect(supabaseReq.ssl).toEqual({ rejectUnauthorized: false });
+    expect(supabaseReq.connectionString).not.toContain("sslmode=");
+
+    const strictVerify = buildPgConnectionConfig(
+      "postgresql://user:pw@db.example.com:5432/db?sslmode=verify-full",
+    );
+    expect(strictVerify.ssl).toEqual({ rejectUnauthorized: true });
+    expect(strictVerify.connectionString).toContain("sslmode=verify-full");
   });
 });
