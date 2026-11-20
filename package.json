@@ -18,20 +18,19 @@
     "db:fingerprint": "tsx scripts/dsn-fingerprint.ts"
   },
   "dependencies": {
-    "bcryptjs": "^3.0.2",
-    "express": "^5.1.0",
-    "pg": "^8.16.0",
-    "zod": "^3.24.2"
-  },
-  "devDependencies": {
-    "@types/bcryptjs": "^3.0.0",
     "@types/express": "^5.0.1",
     "@types/node": "^22.15.0",
     "@types/pg": "^8.11.13",
+    "bcryptjs": "^3.0.2",
+    "express": "^5.1.0",
+    "pg": "^8.16.0",
+    "typescript": "^5.8.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
     "@types/supertest": "^6.0.3",
     "supertest": "^7.1.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.8.0",
     "vitest": "^3.1.0"
   }
 }
